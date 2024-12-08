@@ -1,4 +1,4 @@
-import "../css/calendar.css"; // Import the CSS file
+// import "../css/calendar.css"; // Import the CSS file
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleLeft, faAngleRight } from "@fortawesome/free-solid-svg-icons";
 import Calendar from "react-calendar";
@@ -20,8 +20,9 @@ export default function CalendarBook({
 
   // const exceptionDates = data.exceptionDates;
   const bookDateDetails = data.bookDateDetails;
+  console.log(bookDateDetails);
   const notAvailableDates = data.notAvailableDates;
-
+  console.log(notAvailableDates);
   const unavailableDates = [
     ...bookDateDetails.map(
       (date) => new Date(moment(date.night).format("YYYY-MM-DD"))
@@ -150,8 +151,6 @@ export default function CalendarBook({
           showDoubleView={true}
         />
       </div>
-
-      <br />
     </StyledContainerCalendar>
   );
 }

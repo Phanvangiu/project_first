@@ -125,16 +125,26 @@ export default function LocationListing() {
   useEffect(() => {
     if (state.addressCode && isRead == true) {
       var addrressArr = state.addressCode.split("_");
-      const tempProvince = dchc.data.find((city) => city.level1_id == addrressArr[0]);
-      setChosenProvince({ value: tempProvince.level1_id, label: tempProvince.name });
+      const tempProvince = dchc.data.find(
+        (city) => city.level1_id == addrressArr[0]
+      );
+      setChosenProvince({
+        value: tempProvince.level1_id,
+        label: tempProvince.name,
+      });
 
       const tempDistrict = tempProvince.level2s.find(
         (district) => district.level2_id == addrressArr[1]
       );
 
-      setChosenDistrict({ value: tempDistrict.level2_id, label: tempDistrict.name });
+      setChosenDistrict({
+        value: tempDistrict.level2_id,
+        label: tempDistrict.name,
+      });
 
-      const tempWard = tempDistrict.level3s.find((ward) => ward.level3_id == addrressArr[2]);
+      const tempWard = tempDistrict.level3s.find(
+        (ward) => ward.level3_id == addrressArr[2]
+      );
 
       setChosenWard({ value: tempWard.level3_id, label: tempWard.name });
       return;
@@ -158,7 +168,9 @@ export default function LocationListing() {
     }
 
     if (chosenProvince != null) {
-      const districtsData = dchc.data.find((city) => city.level1_id == chosenProvince.value);
+      const districtsData = dchc.data.find(
+        (city) => city.level1_id == chosenProvince.value
+      );
 
       setDistricts(() =>
         districtsData.level2s.map((district) => {
@@ -175,7 +187,9 @@ export default function LocationListing() {
     }
 
     if (chosenDistrict != null) {
-      const districtsData = dchc.data.find((city) => city.level1_id == chosenProvince.value);
+      const districtsData = dchc.data.find(
+        (city) => city.level1_id == chosenProvince.value
+      );
       const wardsData = districtsData.level2s.find(
         (district) => district.level2_id == chosenDistrict.value
       );
@@ -232,7 +246,10 @@ export default function LocationListing() {
       <Container>
         <Header>
           <h2>Where's your place located</h2>
-          <p>Guest will only have your exact address once they've booked a reservation</p>
+          <p>
+            Guest will only have your exact address once they've booked a
+            reservation
+          </p>
         </Header>
         <Body>
           <Left>
@@ -254,21 +271,30 @@ export default function LocationListing() {
             </div>
             <div>
               <label>Ward</label>
-              <SelectInput options={wards} state={chosenWard} setState={setChosenWard} />
+              <SelectInput
+                options={wards}
+                state={chosenWard}
+                setState={setChosenWard}
+              />
             </div>
             <div>
               <label>Address Detail</label>
               <AddressDetail
                 value={state.addressDetail}
                 onChange={(ev) =>
-                  dispatch({ type: ACTIONS.CHANGE_ADDRESS_DETAIL, next: ev.target.value })
+                  dispatch({
+                    type: ACTIONS.CHANGE_ADDRESS_DETAIL,
+                    next: ev.target.value,
+                  })
                 }
               />
             </div>
             {state.addressDetail && state.addressCode && (
               <>
                 <div>
-                  <WhiteButton onClick={getCoordinate}>Get Coordinates</WhiteButton>
+                  <WhiteButton onClick={getCoordinate}>
+                    Get Coordinates
+                  </WhiteButton>
                 </div>
                 {state.coordinatesX && state.coordinatesY && (
                   <CoordinateContainer>
@@ -299,8 +325,8 @@ export default function LocationListing() {
             <div>
               <h4>Restriction</h4>
               <p>
-                The website enforces a strict policy, allowing users to select only from the cities
-                under its management
+                The website enforces a strict policy, allowing users to select
+                only from the cities under its management
               </p>
             </div>
           </Right>

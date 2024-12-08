@@ -12,7 +12,7 @@ import {
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { UserRequest } from "@/shared/api/userApi";
-// import { BookingRequest } from "../api/api";
+import { capitalizeFirstLetter } from "@/shared/utils/capitalizeFirstLetter";
 const StyledContainer = styled.div`
   height: auto;
   position: sticky;
@@ -30,9 +30,9 @@ const StyledForm = styled.div`
 const StyledPopup = styled(PopUpContainer)`
   top: 0;
   left: 0;
-  width: 600px;
+  width: 700px;
   padding: 2rem;
-  transform: translate(90%, 13rem);
+  transform: translate(60%, 10rem);
   justify-content: center;
   overflow-y: no-scroll;
 `;
@@ -50,8 +50,7 @@ const StyledHeaderForm = styled.div`
 const StyledConatinerCalendarAndGuest = styled.div`
   border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 6px;
-  /* border: none; */
-  /* border: 2px solid white; */
+  padding-bottom: 0.5px;
 `;
 const StyledContainerCalendar = styled.div`
   display: grid;
@@ -87,12 +86,10 @@ const StyledGuest = styled.div`
   flex-direction: column;
   border: 1px solid #dddddd;
   border-radius: 5px;
-  z-index: 10;
   background-color: #fff;
   padding: 1rem;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   position: absolute;
-  top: calc(100% - calc(100% -15rem));
   width: calc(100% - 3rem);
 `;
 
@@ -113,8 +110,11 @@ const StyledAddSub = styled.span`
   padding: 0px 12px;
   cursor: pointer;
 `;
-const StyledSubmitButton = styled.button`
+const StyledContainerBooking = styled.div`
   margin-top: 1rem;
+`;
+const StyledSubmitButton = styled.button`
+  /* margin-top: 1rem; */
   background-color: #ff0000;
   border-radius: 8px;
   border: none;
@@ -129,7 +129,6 @@ const StyledSubmitButton = styled.button`
   }
   &:active {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    outline: none;
   }
 `;
 const StyledError = styled.div`
@@ -149,7 +148,6 @@ const StyledCountGuest = styled.div`
   flex-direction: column;
   gap: 10px;
   border: 2px solid white;
-
   &:hover {
     border: 2px solid black;
     border-radius: 6px;
@@ -158,7 +156,6 @@ const StyledCountGuest = styled.div`
     font-weight: 600;
     font-size: 12px;
   }
-
   & p {
     margin-top: -0.2rem;
     margin-bottom: 0.3rem;
@@ -197,7 +194,7 @@ const StyledPopupTotal = styled(PopUpContainer)`
   top: 0;
   left: 0;
   margin-left: 10rem;
-  width: 25rem;
+  width: 400px;
   transform: translate(150%, 4rem) scale(1);
   overflow-y: no-scroll;
   transition: transform 0.5s ease, top 0.5s ease, left 0.5s ease;
@@ -254,7 +251,7 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
   const [showTotalBasePrice, setShowTotalBasePrice] = useState(false);
   const [showDiscount, setshowDiscount] = useState(false);
   const [isErrorLoginBooking, setIsErrorLoginBooking] = useState(false);
-  const [isErrorBooking, setIsErrorBooking] = useState(false);
+
   const [showErrorMess, setShowErrorMess] = useState("");
   const containerRef = useRef();
   const navigate = useNavigate();
@@ -349,65 +346,37 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
     finalPrice = finalPrice - finalPrice * (data.monthlyDiscount / 100); // 50% discount
   }
 
-  const startDate = selectedDates[0]; // Đối tượng Date
+  const startDate = selectedDates[0];
   const endDate = selectedDates[1];
   const convertToISO = (dateString) => {
-    if (!dateString) return null; // Handle null or undefined inputs
+    if (!dateString) return null;
 
-    // Parse the date string (it will be in your local time zone)
     const localDate = new Date(dateString);
 
-    // Ensure local date is interpreted as local time by setting it back to midnight in local time
-    localDate.setHours(0, 0, 0, 0); // Set time to midnight to avoid unnecessary time offset
+    localDate.setHours(0, 0, 0, 0);
 
-    // Adjust the local time to UTC (without shifting the date itself)
     const adjustedDate = new Date(
       localDate.getTime() - localDate.getTimezoneOffset() * 60000
     );
 
-    // Return the adjusted date as an ISO string
     return adjustedDate.toISOString();
   };
-  // console.log(
-  //   "data.instantBookRequirementID: " + data.instantBookRequirementID
-  // );
-  // if (user.isSuccess) {
-  //   // console.log(user.data.data.id);
-  //   user.data.data.userBadges.forEach((badge) => {
-  //     console.log(badge.userBadgeId.badgeId);
-  //   });
-  // }
+
   const bookingSubmit = () => {
     if (isErrorLoginBooking) {
       return;
     }
 
-    // Proceed with the booking
-    if (data.instantBookRequirementID != null) {
-      const checkBadge = user.data.data.userBadges.find(
-        (badge) => badge.userBadgeId.badgeId == data.instantBookRequirementID // Use badgeId (lowercase)
-      );
-
-      if (checkBadge) {
-        navigate("/booking/transaction", {
-          state: {
-            checkInDay: convertToISO(startDate),
-            checkOutDay: convertToISO(endDate),
-            adult: adult,
-            children: children,
-            data: data,
-            finalPrice: finalPrice,
-          },
-        });
-        // console.log("User has the required badge for instant booking");
-      } else {
-        setIsErrorBooking(true);
-        setShowErrorMess(
-          "You do not have the required badge for instant booking."
-        );
-        // alert("You do not have the required badge for instant booking.");
-      }
-    }
+    navigate("/booking/transaction", {
+      state: {
+        checkInDay: convertToISO(startDate),
+        checkOutDay: convertToISO(endDate),
+        adult: adult,
+        children: children,
+        data: data,
+        finalPrice: finalPrice,
+      },
+    });
   };
 
   return (
@@ -461,7 +430,7 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
               </div>
             </StyledPopup>
           )}
-          <hr style={{ marginBottom: "-1px" }} />
+          <hr style={{ marginBottom: "-0.7px" }} />
           {/* Guest */}
           <StyledCountGuest className="click-box" onClick={handleClickDropdown}>
             <div>
@@ -552,7 +521,7 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
           </StyledGuest>
         )}
         {selectedDates[0] != null && selectedDates[1] != null ? (
-          <div>
+          <StyledContainerBooking>
             <StyledSubmitButton onClick={() => bookingSubmit()}>
               Booking
             </StyledSubmitButton>
@@ -561,20 +530,17 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
                 {showErrorMess}
               </StyledError>
             )}
-            {isErrorBooking && (
-              <StyledError onClick={() => bookingSubmit()}>
-                {showErrorMess}
-              </StyledError>
-            )}
-          </div>
+          </StyledContainerBooking>
         ) : (
-          <StyledSubmitButton
-            onClick={() => {
-              setIsShowCalendar(true);
-            }}
-          >
-            Check availability
-          </StyledSubmitButton>
+          <StyledContainerBooking>
+            <StyledSubmitButton
+              onClick={() => {
+                setIsShowCalendar(true);
+              }}
+            >
+              Check availability
+            </StyledSubmitButton>
+          </StyledContainerBooking>
         )}
         <div>
           {selectedDates[0] != null && selectedDates[1] != null && (
@@ -625,8 +591,8 @@ export default function Checkout({ data, selectedDates, setSelectedDates }) {
           {/* Discount Popup */}
           {showDiscount && (
             <StyledPopupDiscount setShowPopUp={setshowDiscount}>
-              {data.user.firstName} {data.user.lastName} discounts the price if
-              you stay longer than{" "}
+              {capitalizeFirstLetter(data.user.firstName)} {data.user.lastName}{" "}
+              discounts the price if you stay longer than{" "}
               {dateBookingQuantiy(selectedDates) >= 30 ? "30" : "7"} nights.
             </StyledPopupDiscount>
           )}

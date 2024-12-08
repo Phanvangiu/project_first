@@ -24,3 +24,13 @@ export const GetPropertyRequest = (id) => {
     queryFn: () => request(id),
   });
 };
+export const GetPolicies = () => {
+  const request = async () => {
+    const response = await axiosClient.get(`policyCM`);
+    return response.data;
+  };
+  return useQuery({
+    queryKey: ["policies"],
+    queryFn: () => request(),
+  });
+};

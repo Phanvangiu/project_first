@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { PiCalendarCheckFill } from "react-icons/pi";
 import Paymentform from "./Paymentform";
@@ -7,6 +7,9 @@ import { LuDot } from "react-icons/lu";
 import { IoWarningSharp } from "react-icons/io5";
 import { BookingRequest } from "../../property_detail/api/api";
 import { UserRequest } from "@/shared/api/userApi";
+import ErrorPopUp from "@/shared/components/PopUp/ErrorPopUp";
+import SuccessPopUp from "@/shared/components/PopUp/SuccessPopUp";
+import PageNotFound from "@/shared/components/Pages/PageNotFound";
 
 // Styled components
 const StyledContainerAll = styled.div`
@@ -183,6 +186,10 @@ const Transaction = () => {
   const [expirationError, setExpirationError] = useState("");
   const [cvvError, setCvvError] = useState("");
   const [errorSubmit, setErrorSubmit] = useState(false);
+  const [transactionError, setTransactionError] = useState(false);
+  const [showErrorTransaction, setShowErrorTransaction] = useState("");
+  const [transactionSuccess, setTransactionSuccess] = useState(false);
+  const [showTransactionSuccess, setShowTransactionSuccess] = useState("");
   //Các state và setState
   const paymentState = {
     cardnumber,
@@ -201,13 +208,19 @@ const Transaction = () => {
 
   const { checkInDay, checkOutDay, data, children, adult, finalPrice } =
     location.state || {}; // Extract data from location.state
-
+  // if (!location.state) {
+  //   navigate("/", { replace: true }); // Điều hướng đến trang Not Found
+  // }
   // Redirect if data is missing
-  useEffect(() => {
-    if (!checkInDay || !checkOutDay || !data) {
-      navigate("/");
-    }
-  }, [checkInDay, checkOutDay, data, navigate]);
+  // useEffect(() => {
+  // if (!checkInDay || !checkOutDay || !data) {
+  //   navigate("/");
+  // }
+  // }, [checkInDay, checkOutDay, data]);
+
+  if (!location.state || !checkInDay || !checkOutDay || !data) {
+    return <PageNotFound />;
+  }
 
   // Format date to MM/DD/YYYY
   const formatDate = (date) => {
@@ -249,18 +262,20 @@ const Transaction = () => {
       !cvv ||
       !customerId
     ) {
-      console.log("Vui lòng nhập đầy đủ thông tin");
       setErrorSubmit(true);
     } else {
       bookingRequest.mutate(formData, {
         onSuccess: (response) => {
           if (response.status == 200) {
-            console.log("Thông tin hợp lệ");
             setErrorSubmit(false);
-            // Ngay sau khi thanh toán thành công, điều hướng về trang chủ
-            navigate("/", { replace: true });
-            // Thay thế trang hiện tại trong lịch sử để ngăn người dùng quay lại
-            window.history.replaceState(null, "", "/");
+            setShowTransactionSuccess(response.message);
+            setTransactionSuccess(true);
+          } else if (response.status == 410) {
+            setShowErrorTransaction(response.message);
+            setTransactionError(true);
+          } else if (response.status == 400) {
+            setShowErrorTransaction(response.message);
+            setTransactionError(true);
           }
         },
       });
@@ -269,6 +284,22 @@ const Transaction = () => {
   return (
     <StyledContainerAll>
       {/* <StyledHeader /> */}
+      {transactionError && (
+        <ErrorPopUp
+          action={() => {
+            navigate(`/property_detail/${data.id}`, { replace: true });
+          }}
+          header={showErrorTransaction}
+        />
+      )}
+      {transactionSuccess && (
+        <SuccessPopUp
+          header={showTransactionSuccess}
+          action={() => {
+            navigate(`/property_detail/${data.id}`, { replace: true });
+          }}
+        />
+      )}
       <StyledTitle>Confirm and pay</StyledTitle>
       <StyledContainer>
         <div>
